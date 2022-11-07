@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 from matplotlib.animation import FFMpegWriter
 from visual_encoder.svd_decomposition import *
+from visual_encoder.phase_correlation import *
 from visual_encoder.trajectory_estimators import *
 from scipy import signal
 from PIL import Image
@@ -179,11 +180,11 @@ else:
 
 
     # Com janelamento tipo Blackman-Harris
-    deltax_pc, deltay_pc = shift_estimators.pc_method(img_beg, img_end)
-    deltax_svd, deltay_svd = shift_estimators.svd_method(img_beg, img_end)
+    deltax_pc, deltay_pc = pc_method(img_beg, img_end)
+    deltax_svd, deltay_svd = svd_method(img_beg, img_end)
     # Com janela retangular:
-    deltax_pc, deltay_pc = shift_estimators.pc_method(f, g)
-    deltax_svd, deltay_svd = shift_estimators.svd_method(f, g)
+    deltax_pc, deltay_pc = pc_method(f, g)
+    deltax_svd, deltay_svd = svd_method(f, g)
 
     plt.subplot(2, 5, 8)
     plt.imshow(q_blackman, cmap='gray')
@@ -264,9 +265,9 @@ else:
 
 
     # Com janelamento tipo Blackman-Harris
-    deltax_pc, deltay_pc = shift_estimators.pc_method(img_beg, img_end)
-    deltax_svd, deltay_svd = shift_estimators.svd_method(img_beg, img_end)
+    deltax_pc, deltay_pc = pc_method(img_beg, img_end)
+    deltax_svd, deltay_svd = svd_method(img_beg, img_end)
     # Com janela retangular:
-    deltax_pc, deltay_pc = shift_estimators.pc_method(f, g)
-    deltax_svd, deltay_svd = shift_estimators.svd_method(f, g)
+    deltax_pc, deltay_pc = pc_method(f, g)
+    deltax_svd, deltay_svd = svd_method(f, g)
 

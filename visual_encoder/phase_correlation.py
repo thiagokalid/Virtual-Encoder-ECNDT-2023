@@ -20,11 +20,4 @@ def _fftpos2coordshift(shift, n):
     else:
         return shift
 
-# def _fftposition2coordshift(deltay, deltax, img):
-#     # Deslocamentos positivos pertencerão ao intervalo [0, N/2[ onde N é o número de amostras.
-#     # Deslocamentos negativos pertencerão ao intervalo [N/2, N[ onde N é o número de amostras.
-#     if deltay > img.shape[1] / 2:
-#         deltay = -(img.shape[0] - deltay)
-#     if deltax > img.shape[0] / 2:
-#         deltax = -(img.shape[1] - deltax)
-#     return deltay, deltax
+
