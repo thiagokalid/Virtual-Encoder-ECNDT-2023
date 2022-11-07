@@ -1,5 +1,5 @@
 import numpy as np
-from dsp_utils import crosspower_spectrum
+from visual_encoder.dsp_utils import crosspower_spectrum
 
 
 def pc_method(img1, img2):

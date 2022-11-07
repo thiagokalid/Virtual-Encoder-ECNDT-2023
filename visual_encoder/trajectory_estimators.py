@@ -1,7 +1,7 @@
 import numpy as np
 from visual_encoder.dip_utils import gaussian_noise, salt_and_pepper, apply_window
-import phase_correlation
-import svd_decomposition
+from visual_encoder.phase_correlation import pc_method
+from visual_encoder.svd_decomposition import svd_method
 
 def compute_new_position(deltax, deltay, x0, y0):
     xf = x0 + deltax
@@ -14,9 +14,9 @@ def compute_trajectory(img_beg, img_end, x0, y0, method='pc', window_type=None):
     img_beg, img_end = apply_window(img_beg, img_end, window_type)
 
     if method == 'pc':
-        deltax, deltay = phase_correlation.pc_method(img_beg, img_end)
+        deltax, deltay = pc_method(img_beg, img_end)
     elif method == 'svd':
-        deltax, deltay = svd_decomposition.svd_method(img_beg, img_end)
+        deltax, deltay = svd_method(img_beg, img_end)
     else:
         raise ValueError('Selected method not supported.')
     xf, yf = compute_new_position(deltax, deltay, x0, y0)

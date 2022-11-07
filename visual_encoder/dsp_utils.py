@@ -1,5 +1,5 @@
 import numpy as np
-from numpy.fft import fft2, fftshift, fftfreq
+from numpy.fft import fft2, fftshift
 
 # Utilities associated with digital signal processing (DSP).
 
