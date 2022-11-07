@@ -8,7 +8,6 @@ def pc_method(img1, img2):
     raw_deltay, raw_deltax = np.where(q == np.max(q))  # Máximo do normalized crosspower spectrum
     deltay = _fftpos2coordshift(raw_deltay, m)
     deltax = _fftpos2coordshift(raw_deltax, n)
-    # deltay, deltax = _fftposition2coordshift(raw_deltay, raw_deltax, img1)  # img1 servirá apenas para obter as dimensões
     return deltax, deltay
 
 

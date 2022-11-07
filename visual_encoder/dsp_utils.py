@@ -17,14 +17,14 @@ def ideal_lowpass(I, method='Stone_et_al_2001'):
 
 
 def crosspower_spectrum(f, g, method=None):
-    # referência: https://en.wikipedia.org/wiki/Phase_correlation
+    # Reference: https://en.wikipedia.org/wiki/Phase_correlation
     F = fftshift(fft2(f))
     G = fftshift(fft2(g))
     if method is not None:
         F = ideal_lowpass(F, method=method)
         G = ideal_lowpass(G, method=method)
     Q = F * np.conj(G) / np.abs(F * np.conj(G))
-    q = np.abs(np.fft.ifft2(Q))  # em tese é real, porém arredondamentos não o fazem.
+    q = np.abs(np.fft.ifft2(Q))  # in theory, q must be fully real, but due to numerical approximations it is not.
     return q, Q
 
 
@@ -39,14 +39,3 @@ def ideal_lowpass2(I, method='Stone_et_al_2001'):
     else:
         raise ValueError('Método não suportado.')
 
-
-def crosspower_spectrum2(f, g, method=None):
-    # referência: https://en.wikipedia.org/wiki/Phase_correlation
-    F = fftshift(fft2(f))
-    G = fftshift(fft2(g))
-    if method is not None:
-        F, N = ideal_lowpass2(F, method=method)
-        G, N = ideal_lowpass2(G, method=method)
-    Q = F * np.conj(G) / np.abs(F * np.conj(G))
-    q = np.real(np.fft.ifft2(Q))  # em tese é real, porém arredondamentos não o fazem.
-    return q, Q, N
