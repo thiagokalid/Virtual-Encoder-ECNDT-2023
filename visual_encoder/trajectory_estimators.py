@@ -9,27 +9,28 @@ def compute_new_position(deltax, deltay, x0, y0):
     return xf, yf
 
 
-def compute_trajectory(img_beg, img_end, x0, y0, method='pc', window_type=None):
+def compute_trajectory(img_beg, img_end, x0, y0, traj_params):
     # Aplica algum tipo de janelamento para mitigar os edging effects:
-    img_beg, img_end = apply_window(img_beg, img_end, window_type)
+    img_beg, img_end = apply_window(img_beg, img_end, traj_params.spatial_window)
 
-    if method == 'pc':
-        deltax, deltay = pc_method(img_beg, img_end)
-    elif method == 'svd':
-        deltax, deltay = svd_method(img_beg, img_end)
+    if traj_params.method == 'pc':
+        deltax, deltay = pc_method(img_beg, img_end, traj_params.frequency_window)
+    elif traj_params.method == 'svd':
+        deltax, deltay = svd_method(img_beg, img_end, traj_params.frequency_window)
     else:
         raise ValueError('Selected method not supported.')
+
     xf, yf = compute_new_position(deltax, deltay, x0, y0)
     return xf, yf
 
 
-def compute_total_trajectory(img_list, x0, y0, method='pc', window_type=None):
+def compute_total_trajectory(img_list, traj_params):
     positions = np.zeros((len(img_list), 2))
-    positions[0, :] = (x0, y0)
+    x0, y0 = positions[0, :] = traj_params.get_init_coord()
     for i in range(1, len(img_list)):
         if i == 69:
             pass
-        positions[i, :] = compute_trajectory(img_list[i - 1], img_list[i], x0, y0, method=method, window_type=window_type)
+        positions[i, :] = compute_trajectory(img_list[i - 1], img_list[i], x0, y0, traj_params)
         x0, y0 = positions[i, :]
     return positions
 
