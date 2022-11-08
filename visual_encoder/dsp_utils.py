@@ -24,7 +24,7 @@ def crosspower_spectrum(f, g, method=None):
         F = ideal_lowpass(F, method=method)
         G = ideal_lowpass(G, method=method)
     Q = F * np.conj(G) / np.abs(F * np.conj(G))
-    q = np.abs(np.fft.ifft2(Q))  # in theory, q must be fully real, but due to numerical approximations it is not.
+    q = np.real(np.fft.ifft2(Q))  # in theory, q must be fully real, but due to numerical approximations it is not.
     return q, Q
 
 
