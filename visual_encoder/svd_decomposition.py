@@ -10,10 +10,10 @@ def linear_regression(x, y):
     return mu, c
 
 
-def phase_unwrapping(phase_vec):
+def phase_unwrapping(phase_vec, factor=0.7):
     phase_diff = np.diff(phase_vec)
-    corrected_difference = phase_diff - 2. * np.pi * (phase_diff > (2 * np.pi * 0.9)) + 2. * np.pi * (
-                phase_diff < -(2 * np.pi * 0.9))
+    corrected_difference = phase_diff - 2. * np.pi * (phase_diff > (2 * np.pi * factor)) + 2. * np.pi * (
+                phase_diff < -(2 * np.pi * factor))
     return np.cumsum(corrected_difference)
 
 
