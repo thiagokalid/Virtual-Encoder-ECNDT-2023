@@ -1,6 +1,7 @@
 from visual_encoder.displacement_params import DisplacementParams
-from visual_encoder.trajectory_estimators import compute_total_trajectory
+from visual_encoder.trajectory_estimators import compute_total_trajectory, compute_total_trajectory_path
 from visual_encoder.phase_correlation import crosspower_spectrum
+from visual_encoder.trajectory_estimators import get_img
 from visual_encoder.svd_decomposition import phase_unwrapping, linear_regression
 from scipy.sparse.linalg import svds
 import numpy as np
@@ -25,15 +26,15 @@ class TrajectoryParams(DisplacementParams):
         else:
             return self.coords
 
-    def compute_cps(self, img_list, shot):
-        f = img_list[shot]
-        g = img_list[shot - 1]
+    def compute_cps(self, shot, data_root):
+        f = get_img(shot, data_root)
+        g = get_img(shot-1, data_root)
         q, Q = crosspower_spectrum(f, g, self.frequency_window)
         return q, Q
 
-    def compute_svd(self, img_list, shot):
-        f = img_list[shot]
-        g = img_list[shot - 1]
+    def compute_svd(self, shot, data_root):
+        f = get_img(shot, data_root)
+        g = get_img(shot-1, data_root)
         q, Q = crosspower_spectrum(f, g, method=self.frequency_window)
         qu, s, qv = svds(Q, k=1)
         return qu, s, qv
@@ -53,3 +54,6 @@ class TrajectoryParams(DisplacementParams):
 
     def compute_total_trajectory(self, img_list):
         self.coords = compute_total_trajectory(img_list, self)
+
+    def compute_total_trajectory_path(self, data_root, n_images, n_beg=1):
+        self.coords = compute_total_trajectory_path(data_root, n_images, self, n_beg=n_beg)

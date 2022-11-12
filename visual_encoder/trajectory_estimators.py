@@ -34,6 +34,26 @@ def compute_total_trajectory(img_list, traj_params):
         x0, y0 = positions[i, :]
     return positions
 
+def compute_total_trajectory_path(data_root, n_images, traj_params, n_beg=1):
+    positions = np.zeros((n_images, 2))
+    x0, y0 = positions[0, :] = traj_params.get_init_coord()
+    for i in range(n_beg + 1, n_images + n_beg):
+        img_0 = get_img(i-1, data_root)
+        img_f = get_img(i, data_root)
+        j = i - n_beg
+        positions[j, :] = compute_trajectory(img_0, img_f, x0, y0, traj_params)
+        x0, y0 = positions[j, :]
+    return positions
+
+
+def get_img(i, data_root):
+    image_name = f"image{i:02d}.jpg"
+    from PIL import Image
+    rgb2gray = lambda img_rgb: img_rgb[:, :, 0] * .299 + img_rgb[:, :, 1] * .587 + img_rgb[:, :, 2] * .114
+    myImage = Image.open(data_root + image_name)
+    img_rgb = np.array(myImage)
+    img_gray = rgb2gray(img_rgb)
+    return img_gray
 
 def generate_artifical_shifts(base_image, width=None, height=None, x0=0, y0=0, xshifts=None, yshifts=None, steps=100,
                               gaussian_noise_db=None, salt_pepper_noise_prob=None):
