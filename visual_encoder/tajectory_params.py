@@ -6,6 +6,7 @@ from visual_encoder.svd_decomposition import phase_unwrapping, linear_regression
 from scipy.sparse.linalg import svds
 import numpy as np
 
+
 # This class contains all parameters required in the global displacement estimation algorithm
 
 class TrajectoryParams(DisplacementParams):
@@ -28,13 +29,13 @@ class TrajectoryParams(DisplacementParams):
 
     def compute_cps(self, shot, data_root):
         f = get_img(shot, data_root)
-        g = get_img(shot-1, data_root)
+        g = get_img(shot - 1, data_root)
         q, Q = crosspower_spectrum(f, g, self.frequency_window)
         return q, Q
 
     def compute_svd(self, shot, data_root):
         f = get_img(shot, data_root)
-        g = get_img(shot-1, data_root)
+        g = get_img(shot - 1, data_root)
         q, Q = crosspower_spectrum(f, g, method=self.frequency_window)
         qu, s, qv = svds(Q, k=1)
         return qu, s, qv
@@ -57,3 +58,11 @@ class TrajectoryParams(DisplacementParams):
 
     def compute_total_trajectory_path(self, data_root, n_images, n_beg=1):
         self.coords = compute_total_trajectory_path(data_root, n_images, self, n_beg=n_beg)
+
+    def calibrate(self, data_root, filename_list, measured_coords, n_images):
+        # First element in filename_list is related to X axis calibration, then Y shift calibration.
+        resolution = np.zeros(2)  # x and y resolution in pixels / millimeters
+        for i, filename in enumerate(filename_list):
+            coords = compute_total_trajectory_path(data_root + filename + "/", n_images=n_images[i], traj_params=self)
+            resolution[i] = measured_coords[i] / np.abs(coords[-1, 1-i] - coords[0, 1-i])
+        return resolution
