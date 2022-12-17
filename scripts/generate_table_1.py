@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 # Test type: Contact (air)
 
 # Calibration output:
-x_res_air, y_res_air = (0.021592538251603233, 0.02780955452804545) # unit: mm / pixels
+x_res_air, y_res_air = (0.02151467169232321, 0.027715058926976663)  # unit: mm / pixels
 # Measured planar specimen dimensions:
 measured_longest_dist_x = np.mean([359, 358, 357])  # distance in millimeters
 measured_shortest_dist_y = np.mean([200.1, 200, 200.9])  # distance in millimeters
@@ -23,7 +23,7 @@ svd_param = DisplacementParams(method="svd", spatial_window='Blackman-Harris', f
 # Test type: Closed-loop case:
 print("Medium: Air. Beginning of closed-loop...")
 closed_loop_air = TrajectoryParams(svd_param)
-closed_loop_air.compute_total_trajectory_path(data_root + filename[0], n_images=2495)
+closed_loop_air.compute_total_trajectory_path(data_root + filename[0], n_images=1496)
 print("End of closed-loop...")
 
 # Medium: Air (Contact)
@@ -31,7 +31,7 @@ print("End of closed-loop...")
 # Test type: Single-X case:
 print("Beginning of single-x...")
 single_x_air = TrajectoryParams(svd_param)
-single_x_air.compute_total_trajectory_path(data_root + filename[1], n_images=993)
+single_x_air.compute_total_trajectory_path(data_root + filename[1], n_images=594)
 print("End of single-x...")
 
 # Medium: Air (Contact)
@@ -39,7 +39,7 @@ print("End of single-x...")
 # Test type: Single-Y case:
 print("Beginning of single-y...")
 single_y_air = TrajectoryParams(svd_param)
-single_y_air.compute_total_trajectory_path(data_root + filename[2], n_images=993)
+single_y_air.compute_total_trajectory_path(data_root + filename[2], n_images=593)
 print("End of single-y...")
 
 fig = plt.figure(figsize=(9, 5))
@@ -77,10 +77,10 @@ plt.axis('equal')
 plt.grid()
 
 # Geometry : Plane
-# Test type: Contact (air)
+# Test type: Immersion (water)
 
 # Calibration output:
-x_res_water, y_res_water = (0.020522031707206376, 0.025899312847316048)
+x_res_water, y_res_water = (0.020354609115638543, 0.025723094098896563)
 
 filename = [f"water_{name}" + "/" for name in ['closed_loop', 'single_x', 'single_y']]
 data_root = "../data/planar/"
@@ -91,7 +91,7 @@ print("Starting the SVD based estimation method...")
 # Test type: Closed-loop case:
 print("Medium: Water. Beginning of closed-loop...")
 closed_loop_water = TrajectoryParams(svd_param)
-closed_loop_water.compute_total_trajectory_path(data_root + filename[0], n_images=2495)
+closed_loop_water.compute_total_trajectory_path(data_root + filename[0], n_images=1496)
 print("End of closed-loop...")
 
 # Medium: Water (Immersion)
@@ -99,7 +99,7 @@ print("End of closed-loop...")
 # Test type: Single-X case:
 print("Beginning of single-x...")
 single_x_water = TrajectoryParams(svd_param)
-single_x_water.compute_total_trajectory_path(data_root + filename[1], n_images=993)
+single_x_water.compute_total_trajectory_path(data_root + filename[1], n_images=594)
 print("End of single-x...")
 
 # Medium: Water (Immersion)
@@ -107,7 +107,7 @@ print("End of single-x...")
 # Test type: Single-Y case:
 print("Beginning of single-y...")
 single_y_water = TrajectoryParams(svd_param)
-single_y_water.compute_total_trajectory_path(data_root + filename[2], n_images=993)
+single_y_water.compute_total_trajectory_path(data_root + filename[2], n_images=594)
 print("End of single-y...")
 
 
