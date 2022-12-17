@@ -1,11 +1,14 @@
 import matplotlib.pyplot as plt
+from visual_encoder.dsp_utils import ideal_lowpass
 from visual_encoder.phase_correlation import *
 from visual_encoder.tajectory_params import TrajectoryParams
 from visual_encoder.displacement_params import DisplacementParams
 from visual_encoder.trajectory_estimators import get_img
+from scipy.sparse.linalg import svds
+from visual_encoder.svd_decomposition import phase_unwrapping, linear_regression
 
 # Arbitrary shot and
-shot = 500
+shot = 250
 image_size = (480, 640)
 filename = [f"air_{name}" + "/" for name in ['closed_loop', 'single_x', 'single_y']]
 data_root = "../data/planar/"
@@ -13,10 +16,12 @@ print("Starting the SVD based estimation method...")
 svd_param = DisplacementParams(method="svd", spatial_window='Blackman-Harris', frequency_window="Stone_et_al_2001")
 svd_traj = TrajectoryParams(svd_param)
 
-# Current image
-f = get_img(shot, data_root + filename[0])[:, int(image_size[1]/2 - image_size[0]/2):int(image_size[1]/2 + image_size[0]/2)]
+# Current imageq
+f = get_img(shot, data_root + filename[0])[:,
+    int(image_size[1] / 2 - image_size[0] / 2):int(image_size[1] / 2 + image_size[0] / 2)]
 # Next image
-g = get_img(shot+1, data_root + filename[0])[:, int(image_size[1]/2 - image_size[0]/2):int(image_size[1]/2 + image_size[0]/2)]
+g = get_img(shot + 1, data_root + filename[0])[:,
+    int(image_size[1] / 2 - image_size[0] / 2):int(image_size[1] / 2 + image_size[0] / 2)]
 
 # Apply 2D FFT:
 F = np.fft.fftshift(np.fft.fft2(f))
@@ -24,92 +29,126 @@ G = np.fft.fftshift(np.fft.fft2(g))
 
 # Cross power-spectrum:
 q, Q = crosspower_spectrum(f, g)
+m = 0.8 * Q.shape[0] / 2
+n = 0.8 * Q.shape[1] / 2
+
+
+# Window size:
+Q_wind = ideal_lowpass(Q, factor=0.3)
+
+# SVD Truncation:
+qu, s, qv = svds(Q_wind, k=1)
+qu = qu[:, 0]
+qv = qv[0, :]
+pu = np.angle(qu)
+pv = np.angle(qv)
+pu_unwrapped = phase_unwrapping(pu[:])
+pv_unwrapped = phase_unwrapping(pv[:])
+N = pu_unwrapped.size // 2
+
+r = np.arange(0, pu_unwrapped.size)
+M = r.size // 2
+# Choosing a smaller window:
+x1 = r
+y = pu_unwrapped
+mu1, c1 = linear_regression(x1, y)
+
+r = np.arange(0, pv_unwrapped.size)
+M = r.size // 2
+# Choosing a smaller window:
+x2 = r
+y = pv_unwrapped
+mu2, c2 = linear_regression(x2, y)
 
 fig, axis = plt.subplots(nrows=2, ncols=7)
 
 axis[0, 0].imshow(f, cmap="gray")
-axis[0, 0].set_title("$f(x,y)$")
+axis[0, 0].set_title("$f_n(x,y)$")
+
 axis[1, 0].imshow(g, cmap="gray")
-axis[1, 0].set_title("$g(x,y)$")
+axis[1, 0].set_title("$f_{n-1}(x,y)$")
+
 axis[0, 1].imshow(np.log10(np.abs(F) + 1), cmap="gray")
-axis[0, 1].set_title("$log_{10}(FFT(|f(x,y)| + 1)$")
+axis[0, 1].set_title("$log_{10}(|FFT(f_{n}(x,y)| + 1)$")
+
 axis[1, 1].imshow(np.log10(np.abs(G) + 1), cmap="gray")
-axis[1, 1].set_title("$log_{10}(FFT(|g(x,y)| + 1)$")
+axis[1, 1].set_title("$log_{10}(|FFT(f_{n-1}(x,y)| + 1)$")
+
 axis[0, 2].imshow(np.log10(np.abs(Q)), cmap='gray')
 axis[0, 2].set_title("$Q_n$")
-axis[1, 2].imshow(np.log10(np.abs(Q)), cmap='gray')
-axis[1, 2].set_title("$Q_n \cdot w(x,y)$")
-#
-# M, N = curr_img.shape
 
-# qu, s, qv = svd_traj.compute_svd(shot, data_root)
-# pu = np.angle(qu[:, 0])
-# pv = np.angle(qv[0, :])
-# pu_unwrapped = phase_unwrapping(pu)
-# pv_unwrapped = phase_unwrapping(pv)
-# deltay, muy, cy, xy, yy = svd_traj.estimate_shift(pu_unwrapped, M)
-# deltax, mux, cx, xx, yx = svd_traj.estimate_shift(pv_unwrapped, N)
-#
-# plt.suptitle(f"Shot = {shot}")
-# plt.subplot(2, 4, 1)
-# plt.imshow(curr_img[::-1, :], cmap='gray',
-#        extent=[svd_traj.get_coords(shot)[0],  # Esquerda X
-#                svd_traj.get_coords(shot)[0] + curr_img.shape[1],  # Direita X
-#                svd_traj.get_coords(shot)[1],  # Topo Y
-#                svd_traj.get_coords(shot)[1] + curr_img.shape[0]]  # Base Y
+axis[1, 2].imshow(np.log10(np.abs(Q_wind)), cmap='gray')
+axis[1, 2].set_title("$Q_n \cdot w(x,y)$")
+
+axis[0, 3].plot(np.real(qu), '-o', markersize=3, label="$Re(q_u)$", color="#FF1F5B")
+axis[0, 3].plot(np.imag(qu), '-o', markersize=3, label="$Im(q_u)$", color="#FFC61E")
+axis[0, 3].set_title("$q_u(u,v)$")
+axis[0, 3].legend()
+
+
+
+
+axis[1, 3].plot(np.real(qv), '-o', markersize=3, label="$Re(q_v)$", color="#FF1F5B")
+axis[1, 3].plot(np.imag(qv), '-o', markersize=3, label="$Im(q_v)$", color="#FFC61E")
+axis[1, 3].set_title("$q_v(u,v)$")
+axis[1, 3].legend()
+
+
+axis[0, 4].plot(pu, '-o', markersize=4, color="#FF1F5B")
+axis[0, 4].set_title("$p_u(u,v)$")
+
+
+
+
+
+
+axis[1, 4].plot(pv, '-o', markersize=4, color="#FF1F5B")
+axis[1, 4].set_title("$p_v(u,v)$")
+
+axis[0, 5].plot(pu_unwrapped, 'o', markersize=4, color="#FF1F5B")
+axis[0, 5].set_title("unwrap($p_u(u,v)$)")
+
+
+
+axis[1, 5].plot(pv_unwrapped, 'o', markersize=4, color="#FF1F5B")
+axis[1, 5].set_title("unwrap($p_v(u,v)$)")
+
+x_span = np.linspace(0, pu_unwrapped.size, pu_unwrapped.size)
+axis[0, 6].plot(x1, pu_unwrapped, 'o', markersize=4, color="#FF1F5B")
+axis[0, 6].plot(x1, x1 * mu1 + c1, color='#009ADE', linewidth=2)
+axis[0, 6].set_title("Linear fit of $p_u$")
+
+# fig = plt.figure(figsize=(3, 3))
+# ax = plt.gca()
+# plt.plot(x2, pv_unwrapped, 'o', markersize=12, color="#FF1F5B")
+# plt.plot(x2, x2 * mu2 + c2, color='#009ADE', linewidth=2)
+# plt.axis(False)
+# plt.xlim([-10, 150])
+# plt.ylim([5, -45])
+# plt.tick_params(axis='both', which='both', bottom=False,
+#                 top=False, left=False, right=False,
+#                 labelbottom=False, labeltop=False,
+#                 labelright=False, labelleft=False)
+# plt.tight_layout()
+# plt.savefig("../figs/Fig2.png", dpi=300, format=None, metadata=None,
+#         bbox_inches="tight"
 #        )
-# plt.xlim([svd_traj.get_coords(shot)[0], svd_traj.get_coords(shot)[0] + curr_img.shape[1]])
-# plt.ylim([svd_traj.get_coords(shot)[1], svd_traj.get_coords(shot)[1] + curr_img.shape[0]])
-# offset_y = curr_img.shape[1] / 2
-# offset_x = curr_img.shape[1] / 2
-#
-# plt.plot(svd_traj.get_coords()[:shot + 1][:, 0] + offset_x,
-#      svd_traj.get_coords()[:shot + 1][:, 1] + offset_y,
-#      ':o',
-#      color='r', label='SVD')
-# plt.plot(pc_traj.get_coords()[:shot + 1][:, 0] + offset_x,
-#      pc_traj.get_coords()[:shot + 1][:, 1] + offset_y,
-#      ':o',
-#      color='g', label='PC')
-#
-# plt.subplot(2, 4, 5)
-# plt.imshow(np.angle(qu @ np.diag(s) @ qv), cmap='gray')
-# plt.title("Crosspower spectrum")
-#
-# plt.subplot(2, 4, 2)
-# x_pu = np.arange(0, pu_unwrapped.size)
-# plt.stem(x_pu, pu[:-1])
-# plt.title(r"$p_u$")
-#
-# plt.subplot(2, 4, 3)
-# x_pu = np.arange(0, pu_unwrapped.size)
-# plt.stem(x_pu[:-1], np.diff(pu[:-1]))
-# factor = 0.8
-# plt.plot(x_pu, 2*np.pi*factor*np.ones_like(pu[:-1]), ":r")
-# plt.plot(x_pu, -2*np.pi*factor*np.ones_like(pu[:-1]), ":r")
-# plt.title(r"diff$(p_u)$")
-#
-# plt.subplot(2, 4, 4)
-# x_pu = np.arange(0, pu_unwrapped.size)
-# plt.stem(x_pu, pu_unwrapped)
-# plt.plot(xy, xy * muy + cy, color='r')
-# plt.title(r'unwrap$(p_u)$')
-#
-# plt.subplot(2, 4, 6)
-# x_pv = np.arange(0, pv_unwrapped.size)
-# plt.stem(x_pv, pv[:-1])
-# plt.title(r"$p_v$")
-#
-# plt.subplot(2, 4, 7)
-# x_pu = np.arange(0, pu_unwrapped.size)
-# plt.stem(x_pu[:-1], np.diff(pu[:-1]))
-# factor = 0.9
-# plt.plot(x_pu, 2 * np.pi * factor * np.ones_like(pu[:-1]), ":r")
-# plt.plot(x_pu, -2 * np.pi * factor * np.ones_like(pu[:-1]), ":r")
-# plt.title(r"diff$(p_u)$")
-#
-# plt.subplot(2, 4, 8)
-# x_pu = np.arange(0, pv_unwrapped.size)
-# plt.stem(x_pu, pv_unwrapped)
-# plt.plot(xx, xx * mux + cx, color='r')
-# plt.title(r'unwrap$(p_v)$')
+
+axis[1, 6].plot(x1, pv_unwrapped, 'o', markersize=4, color="#FF1F5B")
+axis[1, 6].plot(x2, x2 * mu2 + c2, color='#009ADE', linewidth=2)
+axis[1, 6].set_title("Linear fit of $p_v$")
+
+
+# fig = plt.figure(figsize=(3, 3))
+# ax = plt.gca()
+# plt.plot(x1, pv_unwrapped, 'o', markersize=4, color="#FF1F5B")
+# plt.plot(x2, x2 * mu2 + c2, color='#009ADE', linewidth=2)
+# plt.axis(False)
+# plt.tick_params(axis='both', which='both', bottom=False,
+#                 top=False, left=False, right=False,
+#                 labelbottom=False, labeltop=False,
+#                 labelright=False, labelleft=False)
+# plt.tight_layout()
+# plt.savefig("../figs/Fig2.png", dpi=300, format=None, metadata=None,
+#         bbox_inches="tight"
+#        )
