@@ -61,12 +61,12 @@ class TrajectoryParams(DisplacementParams):
         coords_2d = compute_total_trajectory_path(data_root, n_images, self, n_beg=n_beg)
         if traj_type == "2d":
             self.coords = coords_2d
-        elif traj_type =="3d":
+        elif traj_type == "3d":
             quaternion_data = get_quat_data(data_root)
-            coords_3d = convert_to_3d(coords_2d, quaternion_data)
+            self.coords = convert_to_3d(coords_2d, quaternion_data)
         else:
             pass
-        return coords_2d
+        return np.copy(self.coords)
 
     def calibrate(self, data_root, filename_list, measured_coords, n_images):
         # First element in filename_list is related to X axis calibration, then Y shift calibration.
