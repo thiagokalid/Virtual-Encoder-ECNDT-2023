@@ -15,6 +15,6 @@ svd_traj = TrajectoryParams(svd_param)
 y_res, x_res = svd_traj.calibrate(data_root,
                                   filename_list=filename,
                                   measured_coords=[measured_shortest_dist_y, measured_longest_dist_x],
-                                  n_images=[1494, 1994]
+                                  n_images=[894, 1196]
                                   )
-# Result: x_res, y_res = (0.021592538251603233, 0.02780955452804545)
+# Result: x_res, y_res = (0.02151467169232321, 0.027715058926976663)
