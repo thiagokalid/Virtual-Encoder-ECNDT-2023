@@ -5,14 +5,26 @@ from visual_encoder.phase_correlation import pc_method
 from visual_encoder.svd_decomposition import svd_method
 from scipy.spatial.transform import Rotation as R
 
-def compute_new_position(deltax, deltay, x0, y0):
-    xf = x0 + deltax
-    yf = y0 + deltay
-    return xf, yf
+
+def compute_new_position(deltax, deltay, x0, y0, z0, rot_calibration=0, quaternion=None):
+    deltax_corrected = deltax * np.cos(rot_calibration) - deltay * np.sin(rot_calibration)
+    deltay_corrected = deltax * np.sin(rot_calibration) + deltay * np.cos(rot_calibration)
+    new_pos = np.array([
+        x0 + deltax_corrected,
+        y0 + deltay_corrected,
+        z0
+    ])
+
+    if quaternion is None:
+        return new_pos
+    else:
+        r = R.from_quat(quaternion)
+        rotated_pos = r.apply(new_pos)
+        return rotated_pos
 
 
-def compute_trajectory(img_beg, img_end, x0, y0, traj_params):
-    # Aplica algum tipo de janelamento para mitigar os edging effects:
+def compute_trajectory(img_beg, img_end, x0, y0, z0, traj_params, quaternion=None):
+    # Windowing in applied in order to mitigate edging effects:
     img_beg, img_end = apply_window(img_beg, img_end, traj_params.spatial_window)
 
     if traj_params.method == 'pc':
@@ -21,31 +33,28 @@ def compute_trajectory(img_beg, img_end, x0, y0, traj_params):
         deltax, deltay = svd_method(img_beg, img_end, traj_params.frequency_window)
     else:
         raise ValueError('Selected method not supported.')
-
-    xf, yf = compute_new_position(deltax, deltay, x0, y0)
-    return xf, yf
-
-
-def compute_total_trajectory(img_list, traj_params):
-    positions = np.zeros((len(img_list), 2))
-    x0, y0 = positions[0, :] = traj_params.get_init_coord()
-    for i in range(1, len(img_list)):
-        if i == 69:
-            pass
-        positions[i, :] = compute_trajectory(img_list[i - 1], img_list[i], x0, y0, traj_params)
-        x0, y0 = positions[i, :]
-    return positions
+    deltax = deltax * traj_params.xy_res[0]
+    deltay = deltay * traj_params.xy_res[1]
+    xf, yf, zf = compute_new_position(deltax, deltay, x0, y0, z0,
+                                      quaternion=quaternion, rot_calibration=traj_params.rot_calibration)
+    return xf, yf, zf
 
 
-def compute_total_trajectory_path(data_root, n_images, traj_params, n_beg=1):
-    positions = np.zeros((n_images, 2))
-    x0, y0 = positions[0, :] = traj_params.get_init_coord()
+def compute_total_trajectory_path(data_root, n_images, traj_params, n_beg=1, quat_data=None):
+    positions = np.zeros((n_images, 3))
+    x0, y0, z0 = positions[0, :] = traj_params.get_init_coord()
     for i in range(n_beg + 1, n_images + n_beg):
         img_0 = get_img(i - 1, data_root)
         img_f = get_img(i, data_root)
         j = i - n_beg
-        positions[j, :] = compute_trajectory(img_0, img_f, x0, y0, traj_params)
-        x0, y0 = positions[j, :]
+        if quat_data is not None:
+            quaternion = quat_data[:, j]
+            positions[j, :] = compute_trajectory(img_0, img_f, x0, y0, z0, traj_params,
+                                                 quaternion=quaternion)
+        else:
+            positions[j, :] = compute_trajectory(img_0, img_f, x0, y0, z0, traj_params)
+
+        x0, y0, z0 = positions[j, :]
     return positions
 
 
@@ -105,13 +114,14 @@ def convert_to_3d(coords_2d, quaternion_vector):
     coords_3d = np.zeros(shape=(coords_2d.shape[0], 3))
     coords_3d[0, :2] = coords_2d[0, :]
     for i in range(1, coords_2d.shape[0]):
-        delta_2d = coords_2d[i] - coords_2d[i-1]
+        delta_2d = coords_2d[i] - coords_2d[i - 1]
         delta_3d = np.array([delta_2d[0], delta_2d[1], 0])
         quat = quaternion_vector[i]
         r = R.from_quat(quat)
         delta_3d = r.apply(delta_3d)
-        coords_3d[i, :] = coords_3d[i-1, :] + delta_3d
+        coords_3d[i, :] = coords_3d[i - 1, :] + delta_3d
     return coords_3d
+
 
 def get_quat_data(data_root, filename="quat_data", n=995):
     quat_data = np.zeros(shape=(n, 4))
