@@ -4,7 +4,7 @@ from visual_encoder.dip_utils import gaussian_noise, salt_and_pepper, apply_wind
 from visual_encoder.phase_correlation import pc_method
 from visual_encoder.svd_decomposition import svd_method
 from scipy.spatial.transform import Rotation as R
-
+from PIL import Image
 
 def compute_new_position(deltax, deltay, x0, y0, z0, rot_calibration=0, quaternion=None):
     deltax_corrected = deltax * np.cos(rot_calibration) - deltay * np.sin(rot_calibration)
@@ -58,17 +58,21 @@ def compute_total_trajectory_path(data_root, n_images, traj_params, n_beg=1, qua
     return positions
 
 
-def get_img(i, data_root):
+def get_img(i, data_root, rgb=False):
     image_list = os.listdir(data_root)
-    image_name = list(filter(lambda x: f"image{i:02d}_" in x, image_list))[0]
     # image_name = f"image{i:02d}.jpg"
-    from PIL import Image
-    rgb2gray = lambda img_rgb: img_rgb[:, :, 0] * .299 + img_rgb[:, :, 1] * .587 + img_rgb[:, :, 2] * .114
-    myImage = Image.open(data_root + image_name)
-    img_rgb = np.array(myImage)
-    img_gray = rgb2gray(img_rgb)
-    return img_gray
-
+    if not rgb:
+        image_name = list(filter(lambda x: f"image{i:02d}_" in x, image_list))[0]
+        rgb2gray = lambda img_rgb: img_rgb[:, :, 0] * .299 + img_rgb[:, :, 1] * .587 + img_rgb[:, :, 2] * .114
+        myImage = Image.open(data_root + image_name)
+        img_rgb = np.array(myImage)
+        img_gray = rgb2gray(img_rgb)
+        return img_gray
+    else:
+        image_name = list(filter(lambda x: f"image_{i:02d}" in x, image_list))[0]
+        myImage = Image.open(data_root + image_name)
+        img_rgb = np.array(myImage)
+        return img_rgb
 
 def generate_artifical_shifts(base_image, width=None, height=None, x0=0, y0=0, xshifts=None, yshifts=None, steps=100,
                               gaussian_noise_db=None, salt_pepper_noise_prob=None):

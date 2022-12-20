@@ -8,7 +8,7 @@ for i in range(len(video_type)):
 
 
   while success:
-    cv2.imwrite(data_root + "_video/image_%d.jpg" % count, image)
+    cv2.imwrite(data_root + "_video/image%d.jpg" % count, image)
     success, image = vidcap.read()
     print('Saved image ', count)
     count += 1
