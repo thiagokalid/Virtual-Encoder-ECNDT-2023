@@ -6,24 +6,26 @@ from visual_encoder.svd_decomposition import svd_method
 from scipy.spatial.transform import Rotation as R
 from PIL import Image
 
-def compute_new_position(deltax, deltay, x0, y0, z0, rot_calibration=0, quaternion=None):
+def compute_new_position(deltax, deltay, x0, y0, z0, rot_calibration=0, quaternion=None, euler=None):
+    initial_position = np.array([x0, y0, z0])
     deltax_corrected = deltax * np.cos(rot_calibration) - deltay * np.sin(rot_calibration)
     deltay_corrected = deltax * np.sin(rot_calibration) + deltay * np.cos(rot_calibration)
-    new_pos = np.array([
-        x0 + deltax_corrected,
-        y0 + deltay_corrected,
-        z0
-    ])
+    delta_3d = np.array([deltax_corrected, deltay_corrected, 0])
 
-    if quaternion is None:
-        return new_pos
-    else:
+    if quaternion is None and euler is None:
+        return initial_position + delta_3d
+    elif quaternion is None and euler is not None:
+        r = R.from_euler("yxz", euler, degrees=True)
+        delta_3d_rotated = r.apply(delta_3d)
+        return initial_position + delta_3d_rotated
+    elif quaternion is not None and euler is None:
         r = R.from_quat(quaternion)
-        rotated_pos = r.apply(new_pos)
-        return rotated_pos
+        delta_3d_rotated = r.apply(delta_3d)
+        return initial_position + delta_3d_rotated
+    else:
+        raise ValueError("Incorrect orientation data.")
 
-
-def compute_trajectory(img_beg, img_end, x0, y0, z0, traj_params, quaternion=None):
+def compute_trajectory(img_beg, img_end, x0, y0, z0, traj_params, quaternion=None, euler=None):
     # Windowing in applied in order to mitigate edging effects:
     img_beg, img_end = apply_window(img_beg, img_end, traj_params.spatial_window)
 
@@ -36,11 +38,11 @@ def compute_trajectory(img_beg, img_end, x0, y0, z0, traj_params, quaternion=Non
     deltax = deltax * traj_params.xy_res[0]
     deltay = deltay * traj_params.xy_res[1]
     xf, yf, zf = compute_new_position(deltax, deltay, x0, y0, z0,
-                                      quaternion=quaternion, rot_calibration=traj_params.rot_calibration)
+                                      quaternion=quaternion, euler=euler, rot_calibration=traj_params.rot_calibration)
     return xf, yf, zf
 
 
-def compute_total_trajectory_path(data_root, n_images, traj_params, n_beg=1, quat_data=None):
+def compute_total_trajectory_path(data_root, n_images, traj_params, n_beg=1, quat_data=None, euler_data=None):
     positions = np.zeros((n_images, 3))
     x0, y0, z0 = positions[0, :] = traj_params.get_init_coord()
     for i in range(n_beg + 1, n_images + n_beg):
@@ -48,9 +50,13 @@ def compute_total_trajectory_path(data_root, n_images, traj_params, n_beg=1, qua
         img_f = get_img(i, data_root)
         j = i - n_beg
         if quat_data is not None:
-            quaternion = quat_data[:, j]
+            quaternion = quat_data[j, :]
             positions[j, :] = compute_trajectory(img_0, img_f, x0, y0, z0, traj_params,
                                                  quaternion=quaternion)
+        elif euler_data is not None:
+            euler = euler_data[j, :]
+            positions[j, :] = compute_trajectory(img_0, img_f, x0, y0, z0, traj_params,
+                                                 euler=euler)
         else:
             positions[j, :] = compute_trajectory(img_0, img_f, x0, y0, z0, traj_params)
 

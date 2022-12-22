@@ -55,8 +55,8 @@ class TrajectoryParams(DisplacementParams):
     def set_coords(self, new_coords):
         self.coords = new_coords
 
-    def compute_total_trajectory_path(self, data_root, n_images, n_beg=1, quat_data=None):
-        self.coords = compute_total_trajectory_path(data_root, n_images, self, n_beg=n_beg, quat_data=quat_data)
+    def compute_total_trajectory_path(self, data_root, n_images, n_beg=1, quat_data=None, euler_data=None):
+        self.coords = compute_total_trajectory_path(data_root, n_images, self, n_beg=n_beg, quat_data=quat_data, euler_data=euler_data)
         return np.copy(self.coords)
 
     def calibrate(self, data_root, filename_list, measured_coords, n_images):
