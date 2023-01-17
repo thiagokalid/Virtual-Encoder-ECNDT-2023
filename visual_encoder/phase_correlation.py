@@ -4,7 +4,7 @@ from visual_encoder.dsp_utils import crosspower_spectrum
 
 def pc_method(img1, img2, frequency_window=None):
     m, n = img1.shape
-    q, Q = crosspower_spectrum(img1, img2, frequency_window)
+    q, Q = crosspower_spectrum(img2, img1, frequency_window)
     raw_deltay, raw_deltax = np.where(q == np.max(q))  # Máximo do normalized crosspower spectrum
     deltay = _fftpos2coordshift(raw_deltay, m)
     deltax = _fftpos2coordshift(raw_deltax, n)

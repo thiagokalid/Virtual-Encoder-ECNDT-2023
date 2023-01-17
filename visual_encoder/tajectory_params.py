@@ -49,7 +49,7 @@ class TrajectoryParams(DisplacementParams):
         x = r[M - 50:M + 50]
         y = pu_unwrapped[M - 50:M + 50]
         mu, c = linear_regression(x, y)
-        delta = -mu * N / (2 * np.pi)
+        delta = mu * N / (2 * np.pi)
         return delta, mu, c, x, y
 
     def set_coords(self, new_coords):

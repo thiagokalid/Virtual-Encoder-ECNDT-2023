@@ -26,18 +26,18 @@ def svd_estimate_shift(phase_vec, N):
     x = r[M - 50:M + 50]
     y = phase_unwrapped[M - 50:M + 50]
     mu, c = linear_regression(x, y)
-    delta = -mu * N / (2 * np.pi)
+    delta = mu * N / (2 * np.pi)
     return delta
 
 
-def svd_method(f, g, frequency_window="Stone_et_al_2001"):
-    M, N = f.shape
-    q, Q = crosspower_spectrum(f, g, frequency_window)
+def svd_method(img_beg, img_end, frequency_window="Stone_et_al_2001"):
+    M, N = img_beg.shape
+    q, Q = crosspower_spectrum(img_end, img_beg, frequency_window)
     qu, s, qv = svds(Q, k=1)
-    pu = np.angle(qu[:, 0])
-    pv = np.angle(qv[0, :])
+    ang_qu = np.angle(qu[:, 0])
+    ang_qv = np.angle(qv[0, :])
 
     # Deslocamento no eixo x é equivalente a deslocamento ao longo do eixo das colunas e eixo y das linhas:
-    deltay = svd_estimate_shift(pu, M)
-    deltax = svd_estimate_shift(pv, N)
+    deltay = svd_estimate_shift(ang_qu, M)
+    deltax = svd_estimate_shift(ang_qv, N)
     return deltax, deltay

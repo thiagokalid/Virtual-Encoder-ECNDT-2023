@@ -36,7 +36,8 @@ def compute_trajectory(img_beg, img_end, x0, y0, z0, traj_params, quaternion=Non
     else:
         raise ValueError('Selected method not supported.')
     deltax = deltax * traj_params.xy_res[0]
-    deltay = deltay * traj_params.xy_res[1]
+    deltay = deltay * traj_params.xy_res[1] * -1  # The minus is consequence of the coordinate system difference.
+    # The used system consider ascending row order equals to descending y-axis values.
     xf, yf, zf = compute_new_position(deltax, deltay, x0, y0, z0,
                                       quaternion=quaternion, euler=euler, rot_calibration=traj_params.rot_calibration)
     return xf, yf, zf
@@ -75,7 +76,7 @@ def get_img(i, data_root, rgb=False):
         img_gray = rgb2gray(img_rgb)
         return img_gray
     else:
-        image_name = list(filter(lambda x: f"image_{i:02d}" in x, image_list))[0]
+        image_name = list(filter(lambda x: f"image_{i:02d}." in x, image_list))[0]
         myImage = Image.open(data_root + image_name)
         img_rgb = np.array(myImage)
         return img_rgb
