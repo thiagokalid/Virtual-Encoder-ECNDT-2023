@@ -68,5 +68,5 @@ class TrajectoryParams(DisplacementParams):
         for i, filename in enumerate(filename_list):
             coords = compute_total_trajectory_path(data_root + filename + "/", n_images=n_images[i], traj_params=self)
             resolution[i] = measured_coords[i] / np.abs(coords[-1, 1-i] - coords[0, 1-i])
-            rotation[i] = -(np.arctan((coords[-1, 1] - coords[0, 1]) / (coords[-1, 0] - coords[0, 0])) + ang_correction[i])
+            rotation[i] = -(ang_correction[i] - np.arctan((coords[-1, 1] - coords[0, 1]) / (coords[-1, 0] - coords[0, 0])))
         return *resolution, np.mean(rotation)

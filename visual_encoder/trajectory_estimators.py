@@ -1,10 +1,9 @@
-import numpy as np
-import os
 from visual_encoder.dip_utils import gaussian_noise, salt_and_pepper, apply_window
 from visual_encoder.phase_correlation import pc_method
 from visual_encoder.svd_decomposition import svd_method
 from scipy.spatial.transform import Rotation as R
-from PIL import Image
+from visual_encoder.utils import *
+
 
 def compute_new_position(deltax, deltay, x0, y0, z0, rot_calibration=0, quaternion=None, euler=None):
     initial_position = np.array([x0, y0, z0])
@@ -24,6 +23,7 @@ def compute_new_position(deltax, deltay, x0, y0, z0, rot_calibration=0, quaterni
         return initial_position + delta_3d_rotated
     else:
         raise ValueError("Incorrect orientation data.")
+
 
 def compute_trajectory(img_beg, img_end, x0, y0, z0, traj_params, quaternion=None, euler=None):
     # Windowing in applied in order to mitigate edging effects:
@@ -65,22 +65,6 @@ def compute_total_trajectory_path(data_root, n_images, traj_params, n_beg=1, qua
     return positions
 
 
-def get_img(i, data_root, rgb=False):
-    image_list = os.listdir(data_root)
-    # image_name = f"image{i:02d}.jpg"
-    if not rgb:
-        image_name = list(filter(lambda x: f"image{i:02d}_" in x, image_list))[0]
-        rgb2gray = lambda img_rgb: img_rgb[:, :, 0] * .299 + img_rgb[:, :, 1] * .587 + img_rgb[:, :, 2] * .114
-        myImage = Image.open(data_root + image_name)
-        img_rgb = np.array(myImage)
-        img_gray = rgb2gray(img_rgb)
-        return img_gray
-    else:
-        image_name = list(filter(lambda x: f"image_{i:02d}." in x, image_list))[0]
-        myImage = Image.open(data_root + image_name)
-        img_rgb = np.array(myImage)
-        return img_rgb
-
 def generate_artifical_shifts(base_image, width=None, height=None, x0=0, y0=0, xshifts=None, yshifts=None, steps=100,
                               gaussian_noise_db=None, salt_pepper_noise_prob=None):
     if xshifts is None or yshifts is None:
@@ -121,26 +105,46 @@ def generate_artifical_shifts(base_image, width=None, height=None, x0=0, y0=0, x
     return img_list, xshifts, yshifts, coordinates
 
 
-def convert_to_3d(coords_2d, quaternion_vector):
+# def convert_to_3d(coords_2d, quaternion_vector):
+#     coords_3d = np.zeros(shape=(coords_2d.shape[0], 3))
+#     coords_3d[0, :2] = coords_2d[0, :]
+#     for i in range(1, coords_2d.shape[0]):
+#         delta_2d = coords_2d[i] - coords_2d[i - 1]
+#         delta_3d = np.array([delta_2d[0], delta_2d[1], 0])
+#         quat = quaternion_vector[i]
+#         r = R.from_quat(quat)
+#         delta_3d = r.apply(delta_3d)
+#         coords_3d[i, :] = coords_3d[i - 1, :] + delta_3d
+#     return coords_3d
+
+
+def convert_to_3d(coords_2d, euler_data):
     coords_3d = np.zeros(shape=(coords_2d.shape[0], 3))
-    coords_3d[0, :2] = coords_2d[0, :]
-    for i in range(1, coords_2d.shape[0]):
-        delta_2d = coords_2d[i] - coords_2d[i - 1]
-        delta_3d = np.array([delta_2d[0], delta_2d[1], 0])
-        quat = quaternion_vector[i]
-        r = R.from_quat(quat)
-        delta_3d = r.apply(delta_3d)
-        coords_3d[i, :] = coords_3d[i - 1, :] + delta_3d
+    for i, euler in enumerate(euler_data):
+        r = R.from_euler('yxz', euler, degrees=True)
+        coords_3d[i, :] = r.apply(coords_2d[i, :])
     return coords_3d
 
+def gen_artificial_traj(width, height, num=400, type="rectangular", dim=3):
+    # Ideal coordinates:
+    quarter = num//4
+    positions = np.zeros(shape=(num, dim))
+    positions[:quarter, 0] = np.linspace(0, width, num=quarter)
+    positions[:quarter, 1] = 0
+    positions[quarter:quarter*2, 0] = width
+    positions[quarter:quarter*2, 1] = np.linspace(0, height, num=quarter)
+    positions[quarter*2:quarter*3, 0] = np.linspace(0, width, num=quarter)[::-1]
+    positions[quarter*2:quarter*3, 1] = height
+    positions[quarter*3:, 0] = 0
+    positions[quarter*3:, 1] = np.linspace(0, height, num=quarter)[::-1]
+    return positions
 
-def get_quat_data(data_root, filename="quat_data", n=995):
-    quat_data = np.zeros(shape=(n, 4))
-    with open(data_root + "/" + filename + '.txt', 'r') as f:
-        for i, line in enumerate(f):
-            corrected_line = line.replace("(", "").replace(")", "").replace(" ", "").replace("\n", "").split(',')
-            if "None" in corrected_line:
-                corrected_line = previous_line
-            quat_data[i, :] = np.array([float(x) for x in corrected_line])
-            previous_line = corrected_line
-    return quat_data
+
+def gen_artificial_euler(init_ang=-48.8, end_ang=48.8, num=400, dim=3):
+    quarter = num//4
+    euler_data = np.zeros(shape=(num, dim))
+    euler_data[:quarter*1, 1] = init_ang
+    euler_data[quarter*1:quarter*2, 1] = np.linspace(init_ang, end_ang, num=quarter)
+    euler_data[quarter*2:quarter*3, 1] = end_ang
+    euler_data[quarter*3:quarter*4, 1] = np.linspace(init_ang, end_ang, num=quarter)[::-1]
+    return euler_data
