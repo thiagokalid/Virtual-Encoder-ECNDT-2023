@@ -9,7 +9,8 @@ from scipy.spatial.transform import Rotation as R
 measured_longest_dist_x = np.mean([298, 299, 298])  # distance in millimeters
 measured_shortest_dist_y = np.mean([215, 220, 215])  # distance in millimeters
 
-filename = [f"air_{name}" + "/" for name in ['closed_loop', 'single_x', 'single_y']]
+# Estimating trajectory:
+filename = [f"water_{name}" + "/" for name in ['closed_loop', 'single_x', 'single_y']]
 data_root = "../data/cylindrical/"
 print("Starting the SVD based estimation method...")
 svd_param = DisplacementParams(method="svd", spatial_window='Blackman-Harris', frequency_window="Stone_et_al_2001",
@@ -20,21 +21,24 @@ svd_traj = TrajectoryParams(svd_param)
 svd_traj.compute_total_trajectory_path(data_root + filename[0], n_images=1496)
 print("End of the SVD based estimation method.")
 
-# Read IU data:
+# Read IMU data:
 euler_data = get_euler_data(data_root + filename[0], n=1496)
 euler_data[:, 0] = np.median(euler_data[:, 0])
+euler_data[1256, 1] = euler_data[1255, 1]
+euler_data[1388, 1] = euler_data[1387, 1]
 euler_data[:, 2] = np.median(euler_data[:, 2])
+
 
 # Ideal trajectory:
 coords_2d_ideal = gen_artificial_traj(measured_longest_dist_x, measured_shortest_dist_y)
 euler_data_ideal = gen_artificial_euler(init_ang=euler_data[:, 1].min(), end_ang=euler_data[:, 1].max())
-coords_3d_ideal = convert_to_3d(coords_2d_ideal, euler_data_ideal)
+    coords_3d_ideal = convert_to_3d(coords_2d_ideal, euler_data_ideal)
 
-# Apply IU data in estimated coordiantes:
+# Apply IMU data in estimated coordiantes:
 coords_3d = convert_to_3d(svd_traj.get_coords(), euler_data)
 
 # Apply rotation and correction to all points in order to correct cylinder rotation along x-axis:
-r = R.from_euler('yxz', [0, euler_data[:, 1].min() + 180, 0], degrees=True)
+r = R.from_euler('yxz', [0, -euler_data[:, 1].max() + 180, 0], degrees=True)
 coords_3d_ideal = r.apply(coords_3d_ideal)
 coords_3d_ideal[:, 1] = -coords_3d_ideal[:, 1]
 coords_3d = r.apply(coords_3d)
@@ -43,7 +47,7 @@ coords_3d[:, 1] = -coords_3d[:, 1]
 # Plot data:
 fig = plt.figure(figsize=(7.5, 5.25))
 ax = plt.axes(projection="3d")
-ax.view_init(13, 30)
+ax.view_init(11, -32)
 ax.plot3D(coords_3d[:, 0], coords_3d[:, 1], coords_3d[:, 2], 'o', color="#FF1F5B", label='Reconstructed')
 ax.plot3D(coords_3d_ideal[:, 0], coords_3d_ideal[:, 1], coords_3d_ideal[:, 2], linewidth=3, color="#009ADE",
           label="True")
