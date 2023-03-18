@@ -19,9 +19,8 @@ Each folder represents an experiment (e.g. "air_cylindrical_longest_side") which
   <li>Photos of the ground-facing camera;</li>
   <li>IMU data in quaternion and euler angle format;</li>
 </ol> 
-```
 The experiments under "calibration" folder were used exclusively for calibration purpose.
-+---Virtual-Encoder-ECNDT-2023
+```
 |   |   data.zip
 |   |   
 |   \---data
@@ -68,6 +67,7 @@ The experiments under "calibration" folder were used exclusively for calibration
 |           +---water_single_x
 |           |       
 |           \---water_single_y
+|               
 |               
 ```
 
