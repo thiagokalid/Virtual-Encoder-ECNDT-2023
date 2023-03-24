@@ -36,7 +36,7 @@ def compute_trajectory(img_beg, img_end, x0, y0, z0, traj_params, quaternion=Non
     else:
         raise ValueError('Selected method not supported.')
     deltax = deltax * traj_params.xy_res[0]
-    deltay = deltay * traj_params.xy_res[1] * -1  # The minus is consequence of the coordinate system difference.
+    deltay = deltay * traj_params.xy_res[1] * -1  # The minus is consequence of the coordinate system adopted.
     # The used system consider ascending row order equals to descending y-axis values.
     xf, yf, zf = compute_new_position(deltax, deltay, x0, y0, z0,
                                       quaternion=quaternion, euler=euler, rot_calibration=traj_params.rot_calibration)
