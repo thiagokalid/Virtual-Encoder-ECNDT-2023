@@ -2,6 +2,10 @@
 
 This repository contains scripts that generated the results presented in "Virtual encoder: a two-dimension visual odometer for NDT".
 
+## 0. Demo video
+
+[![](https://imagizer.imageshack.com/v2/640x480q70/922/k25IkO.png)](https://youtu.be/36NNLRFJXkg)
+
 ## 1. Dependecies
 ```
 git status
@@ -11,7 +15,7 @@ git commit
 
 # 2. Dataset
 
-The dataset required to properly reproduce the results are avaliable at <a href="https://drive.google.com/drive/folders/1IEDjHuvrFpMRdltmPRAk1uatcMgQzyiS?usp=share_link"> https://drive.google.com/drive/folders/1IEDjHuvrFpMRdltmPRAk1uatcMgQzyiS?usp=share_link </a> 
+The dataset required to properly reproduce the results is avaliable at <a href="https://drive.google.com/drive/folders/1IEDjHuvrFpMRdltmPRAk1uatcMgQzyiS?usp=share_link"> https://drive.google.com/drive/folders/1IEDjHuvrFpMRdltmPRAk1uatcMgQzyiS?usp=share_link </a> 
 
 ## 2.1. Dataset Organization
 Each folder represents an experiment (e.g. "air_cylindrical_longest_side") which contains:
