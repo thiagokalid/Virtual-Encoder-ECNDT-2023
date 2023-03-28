@@ -2,11 +2,11 @@
 
 This repository contains scripts that generated the results presented in "Virtual encoder: a two-dimension visual odometer for NDT".
 
-## 0. Demo video
+# 0. Demo video
 
 [![](https://imagizer.imageshack.com/v2/640x480q70/922/k25IkO.png)](https://youtu.be/36NNLRFJXkg)
 
-## 1. Dependecies
+# 1. Dependecies
 ```
 git status
 git add
