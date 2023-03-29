@@ -2,28 +2,36 @@
 
 This repository contains scripts that generated the results presented in "Virtual encoder: a two-dimension visual odometer for NDT".
 
-# 0. Demo video
+# 0. Table of Contents
+1. [Demo video](#demo_video)
+2. [Dependecies](#dependencies)
+3. [Dataset](#dataset)
+    1. [Dataset organization](#dataset_organization)
+4. [Getting_started](#getting_started)
+    1. [Installation](#getting_started_installation)
+
+# 1. Demo video <a name="demo_video"></a>
 
 [![](https://imagizer.imageshack.com/v2/640x480q70/922/k25IkO.png)](https://youtu.be/36NNLRFJXkg)
 
-# 1. Dependecies
+# 2. Dependecies <a name="dependencies"></a>
 ```
 git status
 git add
 git commit
 ```
+ 
+# 3. Dataset <a name="dataset"></a>
 
-# 2. Dataset
+The dataset required to properly reproduce the results is avaliable at <a href="https://drive.google.com/drive/folders/1IEDjHuvrFpMRdltmPRAk1uatcMgQzyiS?usp=share_link"> https://drive.google.com/drive/folders/1IEDjHuvrFpMRdltmPRAk1uatcMgQzyiS?usp=share_link </a>. After downloading the "data.zip" you must copy and paste to the main project directory ("Virtual-Encoder-ECNDT-2023/") and then extract it.
 
-The dataset required to properly reproduce the results is avaliable at <a href="https://drive.google.com/drive/folders/1IEDjHuvrFpMRdltmPRAk1uatcMgQzyiS?usp=share_link"> https://drive.google.com/drive/folders/1IEDjHuvrFpMRdltmPRAk1uatcMgQzyiS?usp=share_link </a> 
-
-## 2.1. Dataset Organization
+## 3.i. Dataset Organization <a name="dataset_organization"></a>
 Each folder represents an experiment (e.g. "air_cylindrical_longest_side") which contains:
 <ol>
-  <li>Photos shot by the ground-facing camera;</li>
+  <li>Photos shot by Raspberry Pi ground-facing camera;</li>
   <li>Orientation of the rigid body acquired by the inertial unit in quaternion and euler angle format;</li>
 </ol> 
-The experiments under "calibration" folder were used exclusively for calibration purpose. Data under "planar" and "cylindrical" folder was used for generating the paper results.
+The experiments under "calibration" folder were used exclusively for calibration purpose. Data under "planar" and "cylindrical" folder were used for generating the paper results.
 
 ```
 +---Virtual-Encoder-ECNDT-2023
@@ -76,15 +84,15 @@ The experiments under "calibration" folder were used exclusively for calibration
 |               
 ```
 
-# 3.Getting Started
-## 3.1. Instalation
-### 3.1.a Clone github repository
+# 4.Getting Started <a name="getting_started"></a>
+## 4.1. Installation <a name="getting_started_installation"></a>
+### 4.1.a Clone github repository
 ```
 cd ~
 git clone https://github.com/thiagokalid/Virtual-Encoder-ECNDT-2023
 cd Virtual-Encoder-ECNDT-2023
 ```
 
-### 3.1.b Prerequisities
+### 4.1.b Prerequisities
 You will need to build the Virtual-Encoder-ECNDT-2023 environment by following command:
 
