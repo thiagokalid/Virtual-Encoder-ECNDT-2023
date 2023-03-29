@@ -3,7 +3,6 @@ from visual_encoder.trajectory_estimators import get_img
 
 # Import external packages:
 import matplotlib.pyplot as plt
-import numpy as np
 
 # Where to get the data:
 geometries = ["planar", "cylindrical"]
