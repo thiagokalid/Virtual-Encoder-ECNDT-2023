@@ -25,7 +25,7 @@ def compute_new_position(deltax, deltay, x0, y0, z0, rot_calibration=0, quaterni
         raise ValueError("Incorrect orientation data.")
 
 
-def compute_trajectory(img_beg, img_end, x0, y0, z0, traj_params, quaternion=None, euler=None):
+def compute_trajectory(img_beg, img_end, x0, y0, z0, traj_params):
     # Windowing in applied in order to mitigate edging effects:
     img_beg, img_end = apply_window(img_beg, img_end, traj_params.spatial_window)
 
@@ -38,28 +38,19 @@ def compute_trajectory(img_beg, img_end, x0, y0, z0, traj_params, quaternion=Non
     deltax = deltax * traj_params.xy_res[0]
     deltay = deltay * traj_params.xy_res[1] * -1  # The minus is consequence of the coordinate system adopted.
     # The used system consider ascending row order equals to descending y-axis values.
-    xf, yf, zf = compute_new_position(deltax, deltay, x0, y0, z0,
-                                      quaternion=quaternion, euler=euler, rot_calibration=traj_params.rot_calibration)
+    xf, yf, zf = compute_new_position(deltax, deltay, x0, y0, z0, rot_calibration=traj_params.rot_calibration)
     return xf, yf, zf
 
 
-def compute_total_trajectory_path(data_root, n_images, traj_params, n_beg=1, quat_data=None, euler_data=None):
-    positions = np.zeros((n_images, 3))
+def compute_total_trajectory_path(data_root, n_images, traj_params, n_beg=1):
+    positions = np.zeros((n_images - n_beg + 1, 3))
     x0, y0, z0 = positions[0, :] = traj_params.get_init_coord()
-    for i in range(n_beg + 1, n_images + n_beg):
-        img_0 = get_img(i - 1, data_root)
-        img_f = get_img(i, data_root)
-        j = i - n_beg
-        if quat_data is not None:
-            quaternion = quat_data[j, :]
-            positions[j, :] = compute_trajectory(img_0, img_f, x0, y0, z0, traj_params,
-                                                 quaternion=quaternion)
-        elif euler_data is not None:
-            euler = euler_data[j, :]
-            positions[j, :] = compute_trajectory(img_0, img_f, x0, y0, z0, traj_params,
-                                                 euler=euler)
-        else:
-            positions[j, :] = compute_trajectory(img_0, img_f, x0, y0, z0, traj_params)
+    imgs = get_imgs(n_images, data_root)
+    for i in range(n_beg, n_images - n_beg + 1):
+        img_0 = imgs[i - 1]
+        img_f = imgs[i]
+        j = i - n_beg + 1  # Because inital coord is predefined.
+        positions[j, :] = compute_trajectory(img_0, img_f, x0, y0, z0, traj_params)
 
         x0, y0, z0 = positions[j, :]
     return positions

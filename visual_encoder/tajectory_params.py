@@ -1,8 +1,8 @@
 from visual_encoder.displacement_params import DisplacementParams
 from visual_encoder.trajectory_estimators import compute_total_trajectory_path, convert_to_3d
 from visual_encoder.phase_correlation import crosspower_spectrum
-from visual_encoder.trajectory_estimators import get_img, get_quat_data
-from visual_encoder.svd_decomposition import phase_unwrapping, linear_regression
+from visual_encoder.trajectory_estimators import get_img
+from visual_encoder.svd_decomposition import linear_regression
 from scipy.sparse.linalg import svds
 import numpy as np
 
@@ -55,8 +55,8 @@ class TrajectoryParams(DisplacementParams):
     def set_coords(self, new_coords):
         self.coords = new_coords
 
-    def compute_total_trajectory_path(self, data_root, n_images, n_beg=1, quat_data=None, euler_data=None):
-        self.coords = compute_total_trajectory_path(data_root, n_images, self, n_beg=n_beg, quat_data=quat_data, euler_data=euler_data)
+    def compute_total_trajectory_path(self, data_root, n_images, n_beg=1):
+        self.coords = compute_total_trajectory_path(data_root, n_images, self, n_beg=n_beg)
         return np.copy(self.coords)
 
     def calibrate(self, data_root, filename_list, measured_coords, n_images):

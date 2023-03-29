@@ -162,7 +162,7 @@ axis[1, 6].set(xlabel=None, xticklabels=[], ylabel=None, yticklabels=[])  # remo
 #                 labelbottom=False, labeltop=False,
 #                 labelright=False, labelleft=False)
 # plt.tight_layout()
-# plt.savefig("../figs/Fig2.png", dpi=300, format=None, metadata=None,
+# plt.savefig("../figures/Fig2.png", dpi=300, format=None, metadata=None,
 #         bbox_inches="tight"
 #        )
 
@@ -176,6 +176,6 @@ axis[1, 6].set(xlabel=None, xticklabels=[], ylabel=None, yticklabels=[])  # remo
 #                 labelbottom=False, labeltop=False,
 #                 labelright=False, labelleft=False)
 # plt.tight_layout()
-# plt.savefig("../figs/Fig2.png", dpi=300, format=None, metadata=None,
+# plt.savefig("../figures/Fig2.png", dpi=300, format=None, metadata=None,
 #         bbox_inches="tight"
 #        )
