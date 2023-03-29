@@ -23,7 +23,7 @@ Each folder represents an experiment (e.g. "air_cylindrical_longest_side") which
   <li>Photos shot by the ground-facing camera;</li>
   <li>Orientation of the rigid body acquired by the inertial unit in quaternion and euler angle format;</li>
 </ol> 
-The experiments under "calibration" folder were used exclusively for calibration purpose. Data under "planar" and "cylindrical" folder was used for generating the paper results.
+The experiments under "calibration" folder were used exclusively for calibration purpose. Data under "planar" and "cylindrical" folder were used for generating the paper results.
 
 ```
 +---Virtual-Encoder-ECNDT-2023
