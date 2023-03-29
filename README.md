@@ -23,7 +23,7 @@ git commit
  
 # 3. Dataset <a name="dataset"></a>
 
-The dataset required to properly reproduce the results is avaliable at <a href="https://drive.google.com/drive/folders/1IEDjHuvrFpMRdltmPRAk1uatcMgQzyiS?usp=share_link"> https://drive.google.com/drive/folders/1IEDjHuvrFpMRdltmPRAk1uatcMgQzyiS?usp=share_link </a> 
+The dataset required to properly reproduce the results is avaliable at <a href="https://drive.google.com/drive/folders/1IEDjHuvrFpMRdltmPRAk1uatcMgQzyiS?usp=share_link"> https://drive.google.com/drive/folders/1IEDjHuvrFpMRdltmPRAk1uatcMgQzyiS?usp=share_link </a>. After downloading the "data.zip" you must copy and paste to the main project directory ("Virtual-Encoder-ECNDT-2023/") and then extract it.
 
 ## 3.i. Dataset Organization <a name="dataset_organization"></a>
 Each folder represents an experiment (e.g. "air_cylindrical_longest_side") which contains:
