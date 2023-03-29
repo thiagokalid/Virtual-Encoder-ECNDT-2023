@@ -3,6 +3,7 @@
 *.mp4
 *.png
 *.zip
+.idea
 data
 
 # Created by https://www.gitignore.io/api/intellij
