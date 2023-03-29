@@ -23,6 +23,7 @@ print("End of the SVD based estimation method.")
 
 # Read IMU data:
 euler_data = get_euler_data(data_root + filename[0], n=1496)
+# Some acquired data is corrupted, therefore one must correct it:
 euler_data[:, 0] = np.median(euler_data[:, 0])
 euler_data[1256, 1] = euler_data[1255, 1]
 euler_data[1388, 1] = euler_data[1387, 1]
@@ -32,7 +33,7 @@ euler_data[:, 2] = np.median(euler_data[:, 2])
 # Ideal trajectory:
 coords_2d_ideal = gen_artificial_traj(measured_longest_dist_x, measured_shortest_dist_y)
 euler_data_ideal = gen_artificial_euler(init_ang=euler_data[:, 1].min(), end_ang=euler_data[:, 1].max())
-    coords_3d_ideal = convert_to_3d(coords_2d_ideal, euler_data_ideal)
+coords_3d_ideal = convert_to_3d(coords_2d_ideal, euler_data_ideal)
 
 # Apply IMU data in estimated coordiantes:
 coords_3d = convert_to_3d(svd_traj.get_coords(), euler_data)

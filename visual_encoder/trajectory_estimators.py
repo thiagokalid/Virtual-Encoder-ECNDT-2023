@@ -105,24 +105,19 @@ def generate_artifical_shifts(base_image, width=None, height=None, x0=0, y0=0, x
     return img_list, xshifts, yshifts, coordinates
 
 
-# def convert_to_3d(coords_2d, quaternion_vector):
-#     coords_3d = np.zeros(shape=(coords_2d.shape[0], 3))
-#     coords_3d[0, :2] = coords_2d[0, :]
-#     for i in range(1, coords_2d.shape[0]):
-#         delta_2d = coords_2d[i] - coords_2d[i - 1]
-#         delta_3d = np.array([delta_2d[0], delta_2d[1], 0])
-#         quat = quaternion_vector[i]
-#         r = R.from_quat(quat)
-#         delta_3d = r.apply(delta_3d)
-#         coords_3d[i, :] = coords_3d[i - 1, :] + delta_3d
-#     return coords_3d
-
-
-def convert_to_3d(coords_2d, euler_data):
-    coords_3d = np.zeros(shape=(coords_2d.shape[0], 3))
-    for i, euler in enumerate(euler_data):
-        r = R.from_euler('yxz', euler, degrees=True)
-        coords_3d[i, :] = r.apply(coords_2d[i, :])
+def convert_to_3d(coords_2d, orientation_data, orientation_type="euler"):
+    if orientation_type == "euler":
+        coords_3d = np.zeros(shape=(coords_2d.shape[0], 3))
+        for i, euler in enumerate(orientation_data):
+            r = R.from_euler('yxz', euler, degrees=True)
+            coords_3d[i, :] = r.apply(coords_2d[i, :])
+    elif orientation_type == "quaternion":
+        coords_3d = np.zeros(shape=(coords_2d.shape[0], 3))
+        for i, quat in enumerate(orientation_data):
+            r = R.from_quat(quat)
+            coords_3d[i, :] = r.apply(coords_2d[i, :])
+    else:
+        raise TypeError("Non supported orientation data.")
     return coords_3d
 
 def gen_artificial_traj(width, height, num=400, type="rectangular", dim=3):
