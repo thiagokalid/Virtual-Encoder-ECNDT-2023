@@ -4,28 +4,21 @@ This repository contains scripts which generate the results presented in "Virtua
 
 # 0. Table of Contents
 1. [Demo video](#demo_video)
-2. [Dependecies](#dependencies)
-3. [Dataset](#dataset)
+2. [Dataset](#dataset)
     1. [Dataset organization](#dataset_organization)
-4. [Getting_started](#getting_started)
+3. [Getting_started](#getting_started)
     1. [Installation](#getting_started_installation)
+4. [Dependecies](#dependencies)
 
 # 1. Demo video <a name="demo_video"></a>
 
 [![](https://imagizer.imageshack.com/v2/640x480q70/922/k25IkO.png)](https://youtu.be/36NNLRFJXkg)
-
-# 2. Dependecies <a name="dependencies"></a>
-```
-git status
-git add
-git commit
-```
  
-# 3. Dataset <a name="dataset"></a>
+# 2. Dataset <a name="dataset"></a>
 
 The dataset required to properly reproduce the results is avaliable at <a href="https://drive.google.com/drive/folders/1IEDjHuvrFpMRdltmPRAk1uatcMgQzyiS?usp=share_link"> https://drive.google.com/drive/folders/1IEDjHuvrFpMRdltmPRAk1uatcMgQzyiS?usp=share_link </a>. After downloading the "data.zip" you must copy and paste to the main project directory ("Virtual-Encoder-ECNDT-2023/") and then extract it.
 
-## 3.i. Dataset Organization <a name="dataset_organization"></a>
+## 2.1. Dataset Organization <a name="dataset_organization"></a>
 Each folder represents an experiment (e.g. "air_cylindrical_longest_side") which contains:
 <ol>
   <li>Photos shot by Raspberry Pi ground-facing camera;</li>
@@ -82,6 +75,14 @@ The experiments under "calibration" folder were used exclusively for calibration
 |           |       
 |           \---water_single_y
 |               
+```
+
+# 3. Dependecies <a name="dependencies"></a>
+```
+matplotlib # for data visualization
+scipy # for signal processing algorithms
+numpy # for general numerical processing
+PIL # for image reading and simple image manipulation
 ```
 
 # 4.Getting Started <a name="getting_started"></a>
