@@ -10,7 +10,6 @@ import sys
 import board
 import adafruit_bno055
 
-
 import numpy as np
 from PIL import Image, ImageOps
 from scipy.fft import fft2, fftshift
@@ -28,7 +27,7 @@ curr_img = 0
 prev_img = 0
 fps = 15
 period = 1/fps
-tot_time = 60
+tot_time = 60 
 frame_limit = 1/fps * 1e6 # in us
 img_width = 640
 img_height = 480
@@ -105,8 +104,8 @@ class ProcessOutput(io.BufferedIOBase):
         if self.ser.is_open:
             print("Serial communication in open")
         else:
-            while True:
-                print("Serial communication is not open")
+            #while True:
+            print("ERRO: Serial communication is not open")
 
         #self.protocol = serial.threaded.ReaderThread(self.ser, PrintLines)
 
@@ -151,7 +150,14 @@ class ProcessOutput(io.BufferedIOBase):
                     break # pool is empty
             proc.terminated = True
             proc.join()
-        time.sleep(5)
+        time.sleep(1)
+        print(self.ser.in_waiting)
+        print(self.ser.out_waiting)
+        self.ser.cancel_write()
+        self.ser.reset_input_buffer()
+        self.ser.reset_output_buffer()
+        self.ser.flush()
+        time.sleep(1)
         self.ser.close()
         if(self.ser.is_open):
             print("ERRO")
@@ -190,7 +196,6 @@ finish = time.time()
 print('Captured %d frames at %.2ffps' % (
 output.frame_num,
 output.frame_num / (finish - start)))
-
 time.sleep(1)
 output.terminate()
 # Ending serial commmunication
