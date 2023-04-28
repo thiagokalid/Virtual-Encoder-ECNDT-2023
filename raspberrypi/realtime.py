@@ -27,7 +27,7 @@ curr_img = 0
 prev_img = 0
 fps = 15
 period = 1/fps
-tot_time = 60 
+tot_time = 30
 frame_limit = 1/fps * 1e6 # in us
 img_width = 640
 img_height = 480
@@ -67,9 +67,9 @@ class ImageProcessor(threading.Thread):
                         coord = [deltax * 1000, deltay * 1000, 0.]
                         #self.owner.q#.put(coord)
                         message = (str(coord)+"\n").encode('utf-8')
-                        with self.owner.serial_lock:
-                            self.owner.ser.write(message)
-                        print("coord inside thread=", coord)
+                        #with self.owner.serial_lock:
+                        #    self.owner.ser.write(message)
+                        print(f"coord inside thread= ({coord[0]:>3.2f}, {coord[1]:>3.2f}, {coord[2]:>3.2f})")
                         #print(f"delta = ({deltax:>20.2f}, {deltay:>20.2f}), acumulado = ({self.owner.x_coord:>10.2f}, {self.owner.y_coord:>10.2f})")
                     elif self.owner.frame_num >= fps * tot_time:
                         self.terminated = True
@@ -100,12 +100,6 @@ class ProcessOutput(io.BufferedIOBase):
         self.fft_buffer = np.zeros(shape=(fps * tot_time, img_height, img_width), dtype=complex)
         self.x_coord = 0.
         self.y_coord = 0.
-        self.ser = serial.Serial('/dev/ttyUSB0', 115200, timeout = 1)
-        if self.ser.is_open:
-            print("Serial communication in open")
-        else:
-            #while True:
-            print("ERRO: Serial communication is not open")
 
         #self.protocol = serial.threaded.ReaderThread(self.ser, PrintLines)
 
@@ -151,18 +145,9 @@ class ProcessOutput(io.BufferedIOBase):
             proc.terminated = True
             proc.join()
         time.sleep(1)
-        print(self.ser.in_waiting)
-        print(self.ser.out_waiting)
-        self.ser.cancel_write()
-        self.ser.reset_input_buffer()
-        self.ser.reset_output_buffer()
-        self.ser.flush()
+        #print(self.ser.in_waiting)
+       # print(self.ser.out_waiting)
         time.sleep(1)
-        self.ser.close()
-        if(self.ser.is_open):
-            print("ERRO")
-        else:
-            print("Serial communication is closed")
             
 
 camera = Picamera2()
