@@ -17,9 +17,12 @@ from visual_encoder.svd_decomposition import svd_method
 from visual_encoder.displacement_params import DisplacementParams
 from visual_encoder.tajectory_params import TrajectoryParams, get_img
 from io import BytesIO
-import serial
-import serial.threaded
+#import serial
+#import serial.threaded
 import queue
+
+import RPi.GPIO as gpio #import especifico para trabalhar com GPIO
+
 svd_param = DisplacementParams(method="svd", spatial_window='Blackman-Harris', frequency_window="Stone_et_al_2001")
 svd_traj = TrajectoryParams(svd_param)
 x0, y0, z0 = (0, 0, 0)
@@ -31,6 +34,63 @@ tot_time = 30
 frame_limit = 1/fps * 1e6 # in us
 img_width = 640
 img_height = 480
+
+
+#--- defininindo portas e variáveis para trabalhar com gpio ---#
+
+gpio.setmode(gpio.BCM) # define que as referências de pinagem do raspberry pi devem ser referentes a lista BCM
+
+Encoder1PinPhaseA = 5  
+Encoder1PinPhaseB = 6
+
+Encoder2PinPhaseA = 13
+Encoder2PinPhaseB = 19
+
+Encoder3PinPhaseA = 26
+Encoder3PinPhaseB = 21
+
+encoderPrimary = [Encoder1PinPhaseA,Encoder2PinPhaseA,Encoder3PinPhaseA]
+encoderSecondary = [Encoder1PinPhaseB,Encoder2PinPhaseB,Encoder3PinPhaseB]
+
+arrayUtilitario = [[gpio.HIGH,gpio.HIGH],[gpio.HIGH,gpio.LOW],[gpio.LOW,gpio.LOW],[gpio.LOW,gpio.HIGH]]
+
+#definindo os pinos como saída
+for i in range(3):
+    gpio.setup(encoderPrimary[i], gpio.OUT)
+    gpio.setup(encoderSecondary[i], gpio.OUT)
+
+coordenadasAtuaisNoPanther = [0,0]
+passoDirecaoPanther = [0,0]
+escalaPanther = 1/1000
+
+escalaPyCamX = 0.02151467169232321
+escalaPyCamY = 0.027715058926976663
+
+multiplicador = [0,0,0]
+contador = [0,0,0]
+acumulador = [0,0,0]
+#--- fim do setup GPIO ---#
+
+
+
+def atualizarPos(x, y, z=0):
+    acumulador = [x*escalaPyCamX/escalaPanther , y*escalaPyCamY/escalaPanther, z] + acumulador
+    diferencas = [round(acumulador[0]),round(acumulador[1]),round(acumulador[2])]
+    acumulador = acumulador - diferencas
+
+    for i in range(3):
+        if diferencas[i] > 0:
+            multiplicador[i] = -1
+        elif diferencas[i] < 0:
+            multiplicador[i] = 1
+
+    for i in range(3):
+        while diferencas[i] != 0:
+            contador[i] = (contador[i] + multiplicador[i])%4
+            diferencas[i] = diferencas[i] + multiplicador[i]
+            gpio.output(encoderPrimary[i], arrayUtilitario[contador[i]][0])
+            gpio.output(encoderSecondary[i], arrayUtilitario[contador[i]][1])
+        multiplicador[i] = 0
 
 class ImageProcessor(threading.Thread):
     def __init__(self, owner):
@@ -60,17 +120,9 @@ class ImageProcessor(threading.Thread):
                         f = self.owner.img_buffer[frame_num, :, :]
                         g = self.owner.img_buffer[frame_num-1, :, :]
                         deltax, deltay = svd_method(f, g, downsampling_factor=2)
-                        deltax = deltax * 0.02151467169232321
-                        deltay = deltay * 0.027715058926976663
-                        self.owner.x_coord += deltax
-                        self.owner.y_coord += deltay
-                        coord = [deltax * 1000, deltay * 1000, 0.]
-                        #self.owner.q#.put(coord)
-                        message = (str(coord)+"\n").encode('utf-8')
-                        #with self.owner.serial_lock:
-                        #    self.owner.ser.write(message)
-                        print(f"coord inside thread= ({coord[0]:>3.2f}, {coord[1]:>3.2f}, {coord[2]:>3.2f})")
-                        #print(f"delta = ({deltax:>20.2f}, {deltay:>20.2f}), acumulado = ({self.owner.x_coord:>10.2f}, {self.owner.y_coord:>10.2f})")
+                        with self.owner.gpio_lock:
+                            atualizarPos(deltax, deltay)
+                            
                     elif self.owner.frame_num >= fps * tot_time:
                         self.terminated = True
                     else:
@@ -92,7 +144,7 @@ class ProcessOutput(io.BufferedIOBase):
         # Construct a pool of 4 image processors along with a lock
         # to control access between threads
         self.lock = threading.Lock()
-        self.serial_lock = threading.Lock()
+        self.gpio_lock = threading.Lock()
         self.pool = [ImageProcessor(self) for i in range(3)]
         self.processor = None
         self.frame_num = 0
