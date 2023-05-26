@@ -82,7 +82,7 @@ The experiments under "calibration" folder were used exclusively for calibration
 matplotlib # for data visualization
 scipy # for signal processing algorithms
 numpy # for general numerical processing
-PIL # for image reading and simple image manipulation
+Pillow # for image reading and simple image manipulation (called PIL when imported)
 ```
 
 # 4.Getting Started <a name="getting_started"></a>
