@@ -154,7 +154,7 @@ class ProcessOutput(io.BufferedIOBase):
         self.pool = [ImageProcessor(self) for i in range(3)]
         self.processor = None
         self.frame_num = 0
-        self.contador = [0, 0, 0]
+        self.contador = [0, 0, 0]  # adicionando array de contador
         self.img_buffer = np.zeros(
             shape=(fps * tot_time, img_height, img_width))
         self.fft_buffer = np.zeros(
