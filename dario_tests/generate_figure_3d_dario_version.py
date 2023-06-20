@@ -1,9 +1,7 @@
-#import sys; print('Python %s on %s' % (sys.version, sys.platform))
-#sys.path.extend(['/home/matheusfdario/Documentos/LASSIP/rep/Virtual-Encoder-ECNDT-2023'])
 import matplotlib.pyplot as plt
-from visual_encoder.displacement_params import DisplacementParams
 from visual_encoder.phase_correlation import *
 from visual_encoder.tajectory_params import TrajectoryParams
+from visual_encoder.displacement_params import DisplacementParams
 
 # Figure 3 (d) info:
 # Geometry : Plane
@@ -61,7 +59,4 @@ plt.grid()
 plt.tick_params(axis='both', which='both')
 plt.tight_layout()
 plt.savefig("/home/matheusfdario/Documentos/LASSIP/rep/Virtual-Encoder-ECNDT-2023/dario_tests/figures/Figure3d.eps", format=None, metadata=None, bbox_inches="tight")
-# plt.savefig("../figures/Figure3d.eps", format=None, metadata=None,
-#         bbox_inches="tight"
-#        )
 plt.title("(d) Planar path (2-D)")

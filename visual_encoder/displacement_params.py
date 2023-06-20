@@ -19,7 +19,7 @@ class DisplacementParams:
         if frequency_window in ["Stone_et_al_2001", None]:
             self.frequency_window = frequency_window
         else:
-            raise ValueError("Specified frequemcy window not implemented.")
+            raise ValueError("Specified frequency window not implemented.")
         # Spatial resolution in XY plane. Currently, it is only supported mm/pixels unit.
         if resolution_unit == "mm/pixels":
             self.res_unit = resolution_unit

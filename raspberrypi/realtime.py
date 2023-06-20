@@ -20,6 +20,7 @@ from io import BytesIO
 import serial
 import serial.threaded
 import queue
+# O que cada parâmetro representa?
 svd_param = DisplacementParams(method="svd", spatial_window='Blackman-Harris', frequency_window="Stone_et_al_2001")
 svd_traj = TrajectoryParams(svd_param)
 x0, y0, z0 = (0, 0, 0)
@@ -48,27 +49,27 @@ class ImageProcessor(threading.Thread):
             # Wait for an image to be written to the stream
             if self.event.wait(1):
                 try:
-                    self.stream.seek(0)
-                    frame_num = self.owner.frame_num
+                    self.stream.seek(0)     #inicia steam de video?
+                    frame_num = self.owner.frame_num    #atribui um número para o frame
                     self.owner.frame_num += 1
                     curr_img = np.asarray(ImageOps.grayscale(Image.open(self.stream))) # Lê e guarda foto atual
-                    self.owner.img_buffer[frame_num, :, :] = curr_img
+                    self.owner.img_buffer[frame_num, :, :] = curr_img       #salva imagens
                     #self.owner.fft_buffer[frame_num, :, :] = fft2(curr_img)
-                    if self.owner.frame_num > 10:
-                        #F = self.owner.fft_buffer[self.owner.frame_num, :, :]
-                        #G = self.owner.fft_buffer[self.owner.frame_num - 1, :, :]
+                    if self.owner.frame_num > 10:       #descarta primeiros frames
+                        #F = self.owner.fft_buffer[self.owner.frame_num, :, :]          #previa de buffer de fft
+                        #G = self.owner.fft_buffer[self.owner.frame_num - 1, :, :]      #a idéia é ter treads para só
                         f = self.owner.img_buffer[frame_num, :, :]
                         g = self.owner.img_buffer[frame_num-1, :, :]
                         deltax, deltay = svd_method(f, g, downsampling_factor=2)
-                        deltax = deltax * 0.02151467169232321
-                        deltay = deltay * 0.027715058926976663
+                        deltax = deltax * 0.02151467169232321       #parametros de calibração
+                        deltay = deltay * 0.027715058926976663      #parametros de calibração
                         self.owner.x_coord += deltax
                         self.owner.y_coord += deltay
-                        coord = [deltax * 1000, deltay * 1000, 0.]
+                        coord = [deltax * 1000, deltay * 1000, 0.]          #use priority queue?
                         #self.owner.q#.put(coord)
                         message = (str(coord)+"\n").encode('utf-8')
-                        #with self.owner.serial_lock:
-                        #    self.owner.ser.write(message)
+                        with self.owner.serial_lock:
+                            self.owner.ser.write(message)
                         print(f"coord inside thread= ({coord[0]:>3.2f}, {coord[1]:>3.2f}, {coord[2]:>3.2f})")
                         #print(f"delta = ({deltax:>20.2f}, {deltay:>20.2f}), acumulado = ({self.owner.x_coord:>10.2f}, {self.owner.y_coord:>10.2f})")
                     elif self.owner.frame_num >= fps * tot_time:
@@ -100,6 +101,8 @@ class ProcessOutput(io.BufferedIOBase):
         self.fft_buffer = np.zeros(shape=(fps * tot_time, img_height, img_width), dtype=complex)
         self.x_coord = 0.
         self.y_coord = 0.
+        self.acumulador = np.zeros(3)
+
 
         #self.protocol = serial.threaded.ReaderThread(self.ser, PrintLines)
 
@@ -146,7 +149,7 @@ class ProcessOutput(io.BufferedIOBase):
             proc.join()
         time.sleep(1)
         #print(self.ser.in_waiting)
-       # print(self.ser.out_waiting)
+        # print(self.ser.out_waiting)
         time.sleep(1)
             
 
