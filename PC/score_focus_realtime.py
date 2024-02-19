@@ -10,7 +10,7 @@ camera_id = 1  # Altere o id da câmera aqui
 total_rec_time = 60  # seconds
 max_fps = 30  # Define o FPS máximo desejado
 
-# Inicialize as listas para armazenar os scores
+# Inicialize as listasc para armazenar os scores
 score_history = []
 
 # Define a função para atualizar e exibir o gráfico em tempo real
