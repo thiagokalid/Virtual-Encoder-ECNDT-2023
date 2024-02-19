@@ -105,7 +105,7 @@ class ImageProcessor(threading.Thread):
         self.terminated = False
         self.owner = owner
         self.start()
-
+''
     def run(self):
         # This method runs in a separate thread
         while not self.terminated:

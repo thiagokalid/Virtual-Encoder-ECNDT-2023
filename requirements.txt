@@ -1,4 +1,8 @@
-matplotlib
-scipy
-numpy
+matplotlib~=3.8.2
+scipy~=1.11.4
+numpy~=1.26.3
 PIL
+
+pillow~=10.2.0
+opencv-python~=4.9.0.80
+ffmpeg~=1.4

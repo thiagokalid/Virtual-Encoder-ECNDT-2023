@@ -40,6 +40,23 @@ def get_imgs(n, data_root):
         imgs[i, :, :] = img_gray
     return imgs
 
+
+def get_imgs_cutted(image_path, pixel_increment=1, cutted_img_height=480, cutted_img_width=640):
+    # First read a sample image to obtain its height and width:
+    rgb2gray = lambda img_rgb: img_rgb[:, :, 0] * .299 + img_rgb[:, :, 1] * .587 + img_rgb[:, :, 2] * .114
+    myImage = Image.open(image_path)
+    img_rgb = np.array(myImage)
+    img_gray = rgb2gray(img_rgb)
+    img_height, img_width = img_gray.shape
+    number_of_imgs = (img_width-cutted_img_width)//pixel_increment
+    print(number_of_imgs)
+    imgs = np.zeros(shape=(number_of_imgs, cutted_img_height,cutted_img_width))
+    for i in range(0, number_of_imgs):
+        img_cutted = img_gray[0:cutted_img_height, i*pixel_increment:+cutted_img_width+i*pixel_increment]
+        imgs[i, :, :] = img_cutted
+    return imgs
+
+
 def get_euler_data(data_root, filename="eul_data", n=995):
     euler_data = np.zeros(shape=(n, 3))
     with open(data_root + "/" + filename + '.txt', 'r') as f:
