@@ -27,7 +27,7 @@ def svd_estimate_shift(phase_vec, N):
     y = phase_unwrapped[M - 50:M + 50]
     mu, c = linear_regression(x, y)
     delta = mu * N / (2 * np.pi)
-    return delta
+    return -delta
 
 
 def svd_method(img_beg, img_end, frequency_window="Stone_et_al_2001"):

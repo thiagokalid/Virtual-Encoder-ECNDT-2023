@@ -6,7 +6,7 @@ import time
 import numpy as np
 import matplotlib.pyplot as plt
 from PIL import Image, ImageOps
-from visual_encoder.dsp_utils import image_preprocessing
+from visual_encoder.dsp_utils import image_preprocessing, cv2_to_nparray_grayscale
 
 #img_width = 640
 #img_height = 480
@@ -47,17 +47,13 @@ start_time = time.time()
 
 while time.time() <= start_time + total_rec_time:
     ret, frame = vid.read()
-
-    cv2_img = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-    img_array_rgb = Image.fromarray(cv2_img)
-    img_grayscale = ImageOps.grayscale(img_array_rgb)
-    img_array = np.asarray(img_grayscale)
-
-    M, N = img_array.shape
+    img_array = cv2_to_nparray_grayscale(frame)
     img_processed = image_preprocessing(img_array)
-    #print(img_processed.shape)
-
-    if frame_num > 10:
+    if(frame_num == 0):
+        M, N = img_array.shape
+    elif frame_num == 10:
+        start_time = time.time()
+    elif frame_num > 10:
         deltax, deltay = optimized_svd_method(img_processed, img_processed_old, M, N)
         total_deltax = total_deltax + (deltax*escalaPyCamX)
         total_deltay = total_deltay + (deltay*escalaPyCamY)
