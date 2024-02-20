@@ -18,6 +18,7 @@ data
 .idea/dictionaries
 .idea/vcs.xml
 .idea/jsLibraryMappings.xml
+frames/
 
 # Sensitive or high-churn files:
 .idea/dataSources.ids
